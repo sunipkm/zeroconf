@@ -172,6 +172,16 @@ namespace Zeroconf
             }
 
             if (port != 0) {
+                st = setsockopt(fd, SOL_SOCKET, SO_REUSEADDR, reinterpret_cast<const char*>(&SockTrue), sizeof(SockTrue));
+
+                if (st < 0)
+                {
+                    CloseSocket(fd);
+                    Log::Error("Failed to set socket option SO_REUSEADDR with code " + std::to_string(GetSocketError()));
+                    return false;
+                }
+
+                #ifndef WIN32
                 st = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, reinterpret_cast<const char*>(&SockTrue), sizeof(SockTrue));
 
                 if (st < 0)
@@ -180,6 +190,7 @@ namespace Zeroconf
                     Log::Error("Failed to set socket option SO_REUSEPORT with code " + std::to_string(GetSocketError()));
                     return false;
                 }
+                #endif
 
                 sockaddr_in addr;
                 memset(&addr, 0, sizeof(addr));
