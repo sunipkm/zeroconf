@@ -192,11 +192,13 @@ namespace Zeroconf
                 }
                 #endif
 
-                sockaddr_in addr;
-                memset(&addr, 0, sizeof(addr));
+                sockaddr_in addr = {0};
                 addr.sin_family = AF_INET;
                 addr.sin_port = htons(port);
                 addr.sin_addr.s_addr = INADDR_ANY;
+                #ifdef __APPLE__
+                    addr.sin_len = sizeof(addr);
+                #endif
 
                 st = bind(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
                 if (st < 0)
@@ -217,6 +219,9 @@ namespace Zeroconf
             broadcastAddr.sin_family = AF_INET;
             broadcastAddr.sin_port = htons(5353);
             broadcastAddr.sin_addr.s_addr = INADDR_BROADCAST;
+            #ifdef __APPLE__
+                addr.sin_len = sizeof(broadcastAddr);
+            #endif
 
             auto st = sendto(
                 fd, 
