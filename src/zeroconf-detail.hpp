@@ -181,7 +181,7 @@ namespace Zeroconf
                     return false;
                 }
 
-                #ifndef WIN32
+                #ifdef SO_REUSEPORT
                 st = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, reinterpret_cast<const char*>(&SockTrue), sizeof(SockTrue));
 
                 if (st < 0)
