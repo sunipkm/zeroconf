@@ -154,7 +154,7 @@ namespace Zeroconf
             return pos - offset;
         }
 
-        inline bool CreateSocket(int* result)
+        inline bool CreateSocket(int* result, int16_t port)
         {
             int fd = socket(AF_INET, SOCK_DGRAM, 0);
             if (fd < 0)
@@ -169,6 +169,31 @@ namespace Zeroconf
                 CloseSocket(fd);
                 Log::Error("Failed to set socket option SO_BROADCAST with code " + std::to_string(GetSocketError()));
                 return false;
+            }
+
+            if (port != 0) {
+                st = setsockopt(fd, SOL_SOCKET, SO_REUSEPORT, reinterpret_cast<const char*>(&SockTrue), sizeof(SockTrue));
+
+                if (st < 0)
+                {
+                    CloseSocket(fd);
+                    Log::Error("Failed to set socket option SO_REUSEPORT with code " + std::to_string(GetSocketError()));
+                    return false;
+                }
+
+                sockaddr_in addr;
+                memset(&addr, 0, sizeof(addr));
+                addr.sin_family = AF_INET;
+                addr.sin_port = htons(port);
+                addr.sin_addr.s_addr = INADDR_ANY;
+
+                st = bind(fd, reinterpret_cast<sockaddr*>(&addr), sizeof(addr));
+                if (st < 0)
+                {
+                    CloseSocket(fd);
+                    Log::Error("Failed to bind socket with code " + std::to_string(GetSocketError()));
+                    return false;
+                }
             }
 
             *result = fd;
@@ -371,7 +396,7 @@ namespace Zeroconf
             return true;
         }
 
-        inline bool Resolve(const std::string& serviceName, time_t scanTime, std::vector<mdns_responce>* result)
+        inline bool Resolve(const std::string& serviceName, time_t scanTime, std::vector<mdns_responce>* result, int16_t port)
         {
             result->clear();
 
@@ -381,7 +406,7 @@ namespace Zeroconf
             query.insert(query.end(), std::begin(MdnsQueryFooter), std::end(MdnsQueryFooter));
 
             int fd = 0;
-            if (!CreateSocket(&fd))
+            if (!CreateSocket(&fd, port))
                 return false;
 
             std::shared_ptr<void> guard(0, [fd](void*) { CloseSocket(fd); });

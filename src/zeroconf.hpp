@@ -20,9 +20,9 @@ namespace Zeroconf
     typedef Detail::Log::LogCallback LogCallback;
     typedef Detail::mdns_responce mdns_responce;
 
-    inline bool Resolve(const std::string& serviceName, time_t scanTime, std::vector<mdns_responce>* result)
+    inline bool Resolve(const std::string& serviceName, time_t scanTime, std::vector<mdns_responce>* result, int16_t port = 0)
     {
-        return Detail::Resolve(serviceName, scanTime, result);
+        return Detail::Resolve(serviceName, scanTime, result, port);
     }
 
     inline void SetLogCallback(LogCallback callback)
