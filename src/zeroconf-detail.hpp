@@ -220,7 +220,7 @@ namespace Zeroconf
             broadcastAddr.sin_port = htons(5353);
             broadcastAddr.sin_addr.s_addr = INADDR_BROADCAST;
             #ifdef __APPLE__
-                addr.sin_len = sizeof(broadcastAddr);
+                broadcastAddr.sin_len = sizeof(broadcastAddr);
             #endif
 
             auto st = sendto(
