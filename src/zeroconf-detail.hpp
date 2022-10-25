@@ -15,7 +15,9 @@
 #define WIN32_LEAN_AND_MEAN
 #include <winsock2.h>
 #else
+#ifndef __APPLE__
 #include <error.h>
+#endif
 #include <string.h>
 #include <unistd.h>
 #include <sys/socket.h>
